@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stopwatch</title>
+    <style>
+        /* Global Styles */
+        body {
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #c90ea0, #0f035b);
+            background-size: 400% 400%;
+            animation: gradientBackground 15s ease infinite;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        @keyframes gradientBackground {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            text-align: center;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            animation: glow 1.5s ease-in-out infinite alternate;
+        }
+
+        .stopwatch {
+            background: linear-gradient(135deg, #12c2e9, #c471ed, #f64f59);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+        }
+
+        #display {
+            font-size: 3em;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            color: #ffffff;
+            text-shadow: 0 0 10px #12c2e9, 0 0 20px #c471ed;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background-color: #ffffff;
+            color: #121212;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2em;
+            padding: 10px 20px;
+            margin: 0 10px;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px #12c2e9, 0 0 20px #f64f59;
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, #f64f59, #12c2e9);
+            color: #ffffff;
+            box-shadow: 0 0 20px #12c2e9, 0 0 30px #f64f59;
+        }
+
+        #laps {
+            max-height: 200px;
+            overflow-y: auto;
+            padding-top: 10px;
+            border-top: 1px solid #ffffff;
+        }
+
+        .lap-time {
+            margin: 5px 0;
+            font-size: 1.1em;
+            color: #ffffff;
+            text-shadow: 0 0 10px #f64f59;
+        }
+
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 10px #ffffff, 0 0 20px #ffffff, 0 0 30px #ffffff, 0 0 40px #ffffff;
+            }
+            to {
+                text-shadow: 0 0 20px #ffffff, 0 0 30px #ffffff, 0 0 40px #ffffff, 0 0 50px #ffffff;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Stopwatch</h1>
+        <div class="stopwatch">
+            <div id="display">00:00:00.00</div>
+            <div class="buttons">
+                <button id="startStop" class="btn start">Start</button>
+                <button id="reset" class="btn reset">Reset</button>
+                <button id="lap" class="btn lap">Lap</button>
+            </div>
+            <div class="lap-times" id="laps"></div>
+        </div>
+    </div>
+
+    <script>
+        // Stopwatch Logic
+        let startTime, updatedTime, difference, tInterval;
+        let running = false;
+        let lapNumber = 0;
+
+        const display = document.getElementById('display');
+        const startStopBtn = document.getElementById('startStop');
+        const resetBtn = document.getElementById('reset');
+        const lapBtn = document.getElementById('lap');
+        const lapsContainer = document.getElementById('laps');
+
+        startStopBtn.addEventListener('click', startStop);
+        resetBtn.addEventListener('click', reset);
+        lapBtn.addEventListener('click', recordLap);
+
+        function startStop() {
+            if (!running) {
+                running = true;
+                startStopBtn.innerText = 'Pause';
+                startStopBtn.classList.remove('start');
+                startStopBtn.classList.add('stop');
+                startTime = Date.now() - (difference || 0);
+                tInterval = setInterval(updateTime, 10);
+            } else {
+                running = false;
+                startStopBtn.innerText = 'Start';
+                startStopBtn.classList.remove('stop');
+                startStopBtn.classList.add('start');
+                clearInterval(tInterval);
+            }
+        }
+
+        function reset() {
+            clearInterval(tInterval);
+            running = false;
+            startTime = null;
+            difference = 0;
+            lapNumber = 0;
+            display.innerText = '00:00:00.00';
+            startStopBtn.innerText = 'Start';
+            startStopBtn.classList.remove('stop');
+            startStopBtn.classList.add('start');
+            lapsContainer.innerHTML = '';
+        }
+
+        function updateTime() {
+            updatedTime = Date.now();
+            difference = updatedTime - startTime;
+            const time = new Date(difference);
+            const minutes = ('0' + time.getUTCMinutes()).slice(-2);
+            const seconds = ('0' + time.getUTCSeconds()).slice(-2);
+            const milliseconds = ('0' + time.getUTCMilliseconds()).slice(-3).slice(0, 2);
+            display.innerText = `${minutes}:${seconds}.${milliseconds}`;
+        }
+
+        function recordLap() {
+            if (running) {
+                lapNumber++;
+                const lapTime = display.innerText;
+                const lapElement = document.createElement('div');
+                lapElement.classList.add('lap-time');
+                lapElement.innerText = `Lap ${lapNumber}: ${lapTime}`;
+                lapsContainer.appendChild(lapElement);
+            }
+        }
+    </script>
+</body>
+</html>
